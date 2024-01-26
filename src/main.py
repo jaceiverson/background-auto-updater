@@ -1,5 +1,6 @@
-import time
+#!/venv/bin/python3
 import argparse
+import time
 
 from snowbasin_image import SnowbasinImage, logger
 
@@ -21,10 +22,13 @@ def constant(minute_interval: int = 5):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Flags to help run this once or constantly"
+    parser = argparse.ArgumentParser(description="Flags to help run this once or constantly")
+    parser.add_argument(
+        "-c",
+        "--constant",
+        action="store_true",
+        help="check every -m minutes for a new background",
     )
-    parser.add_argument("-c", "--constant", action="store_true", help="run constantly")
     parser.add_argument(
         "-m",
         "--minute-interval",

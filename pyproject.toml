@@ -5,3 +5,20 @@ version = "0.0.1"
 
 [project.scripts]
 check-sb="main:main"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  # pycodestyle
+  "E",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"

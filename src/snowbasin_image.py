@@ -1,8 +1,9 @@
 #!/venv/bin/python3
-import os
 import datetime as dt
-import logging
 import glob
+import logging
+import os
+
 import requests
 from rich.logging import RichHandler
 from rich.traceback import install
@@ -27,7 +28,8 @@ class SnowbasinImage:
     ) -> None:
         """
         initialize the class
-        background_directory: the directory where the images will be saved. This is an absolute path.
+        background_directory: the directory where the images will be saved.
+         - This is an absolute path.
         Example ~/Desktop/backgrounds/
         """
         self.background_file_path = background_directory
@@ -45,15 +47,36 @@ class SnowbasinImage:
         """
         make the url string
         """
-        return f"{self.base_url}/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/{date.strftime('%H')}-{date.strftime('%M')}/{self.image_size}.jpg"
+        return (
+            f"{self.base_url}/"
+            f"{date.strftime('%Y')}/"
+            f"{date.strftime('%m')}/"
+            f"{date.strftime('%d')}/"
+            f"{date.strftime('%H')}-"
+            f"{date.strftime('%M')}/"
+            f"{self.image_size}.jpg"
+        )
 
     def make_file_path_string(self, date: dt.datetime, full_path: bool = True) -> str:
         """
         make the file path string
         """
         if full_path:
-            return f"{self.background_file_path}{date.strftime('%Y')}-{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%H')}-{date.strftime('%M')}.jpg"
-        return f"{date.strftime('%Y')}-{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%H')}-{date.strftime('%M')}.jpg"
+            return (
+                f"{self.background_file_path}"
+                f"{date.strftime('%Y')}-"
+                f"{date.strftime('%m')}-"
+                f"{date.strftime('%d')}-"
+                f"{date.strftime('%H')}-"
+                f"{date.strftime('%M')}.jpg"
+            )
+        return (
+            f"{date.strftime('%Y')}-"
+            f"{date.strftime('%m')}-"
+            f"{date.strftime('%d')}-"
+            f"{date.strftime('%H')}-"
+            f"{date.strftime('%M')}.jpg"
+        )
 
     @staticmethod
     def make_date_from_file_string(file_name: str) -> dt.datetime:
@@ -101,9 +124,7 @@ class SnowbasinImage:
                 return resp, None
             request_limit += 1
             image_time_to_pull = image_time_to_pull - dt.timedelta(minutes=1)
-            return self.check_for_non_round_image_times(
-                image_time_to_pull, request_limit
-            )
+            return self.check_for_non_round_image_times(image_time_to_pull, request_limit)
 
     def get_image(self, image_time_to_pull: dt.date) -> bool:
         """
@@ -133,7 +154,8 @@ class SnowbasinImage:
             # if at least 6 minutes haven't passed, return the current background
             # this will skip looking for new images
             logger.info(
-                f"[yellow]Not enough time has passed (5 min). Time difference: {right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
+                "[yellow]Not enough time has passed (5 min). Time difference: "
+                f"{right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
             )
             return current_background
 
@@ -175,9 +197,7 @@ class SnowbasinImage:
         """
         try:
             # Use glob to get a list of files in the directory matching the pattern
-            files = glob.glob(
-                os.path.join(os.path.expanduser(self.background_file_path), "*.jpg")
-            )
+            files = glob.glob(os.path.join(os.path.expanduser(self.background_file_path), "*.jpg"))
             if len(files) > 1:
                 raise OSError("More than one file in the directory")
             return files[0]
@@ -190,9 +210,7 @@ class SnowbasinImage:
         move the older image file to the archive folder
         """
         old_file_name = os.path.basename(old_file_path)
-        new_backgrounds_path = os.path.expanduser(
-            f"{self.background_file_path}old_backgrounds/"
-        )
+        new_backgrounds_path = os.path.expanduser(f"{self.background_file_path}old_backgrounds/")
         # check if the directory exists
         if not os.path.exists(new_backgrounds_path):
             os.makedirs(new_backgrounds_path)
@@ -218,9 +236,7 @@ class SnowbasinImage:
         current_background_file = self.get_files_in_directory()
         logger.info(f"[blue]Current background image: {current_background_file}")
         # convert to a datetime object
-        current_background_image_date = self.make_date_from_file_string(
-            current_background_file.split("/")[-1]
-        )
+        current_background_image_date = self.make_date_from_file_string(current_background_file.split("/")[-1])
         # check the date time
         next_image_to_pull = self.find_next_image_time(current_background_image_date)
         # check if the image already exists, we will log and exit the function
@@ -233,14 +249,10 @@ class SnowbasinImage:
             if self.store_previous_images:
                 # move the file
                 self.move_last_image(current_background_file)
-                logger.info(
-                    f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder."
-                )
+                logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
             else:
                 # delete the file
                 self.delete_file(current_background_file)
-                logger.info(
-                    f"[yellow]Deleted {os.path.basename(current_background_file)}"
-                )
+                logger.info(f"[yellow]Deleted {os.path.basename(current_background_file)}")
         else:
             return False
