@@ -6,8 +6,7 @@ to run this I do the following:
 3) type python3 forever.py
 4) press ctrl-a then ctrl-d to detach from the screen (but keep it running)
 """
-from snowbasin_image import SnowbasinImage
-from snowbasin_image import logger
+from snowbasin_image import SnowbasinImage, logger
 import time
 
 if __name__ == "__main__":

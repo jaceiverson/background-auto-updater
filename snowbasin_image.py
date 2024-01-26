@@ -239,8 +239,3 @@ class SnowbasinImage:
                 )
         else:
             return False
-
-
-if __name__ == "__main__":
-    s = SnowbasinImage("~/Desktop/backgrounds/")
-    s.process()
