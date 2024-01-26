@@ -1,4 +1,3 @@
-#!/venv/bin/python3
 import datetime as dt
 import glob
 import logging
