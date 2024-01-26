@@ -6,6 +6,7 @@ import glob
 import requests
 from rich.logging import RichHandler
 from rich.traceback import install
+
 install(show_locals=True)
 
 
@@ -18,7 +19,12 @@ logger = logging.getLogger("rich")
 
 
 class SnowbasinImage:
-    def __init__(self, background_directory: str, store_previous_images:bool = True,image_size:str="1080") -> None:
+    def __init__(
+        self,
+        background_directory: str,
+        store_previous_images: bool = True,
+        image_size: str = "1080",
+    ) -> None:
         """
         initialize the class
         background_directory: the directory where the images will be saved. This is an absolute path.
@@ -29,43 +35,45 @@ class SnowbasinImage:
         self.base_url = "https://storage.googleapis.com/prism-cam-00054"
         self.image_size = image_size
 
-    def set_image_size(self,image_size:str) -> None:
+    def set_image_size(self, image_size: str) -> None:
         """
         set the image size
         """
         self.image_size = image_size
 
-    def make_url_string(self,date:dt.datetime) -> str:
+    def make_url_string(self, date: dt.datetime) -> str:
         """
         make the url string
         """
         return f"{self.base_url}/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/{date.strftime('%H')}-{date.strftime('%M')}/{self.image_size}.jpg"
-    
-    def make_file_path_string(self,date:dt.datetime,full_path:bool = True) -> str:
+
+    def make_file_path_string(self, date: dt.datetime, full_path: bool = True) -> str:
         """
         make the file path string
         """
         if full_path:
             return f"{self.background_file_path}{date.strftime('%Y')}-{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%H')}-{date.strftime('%M')}.jpg"
         return f"{date.strftime('%Y')}-{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%H')}-{date.strftime('%M')}.jpg"
-    
+
     @staticmethod
-    def make_date_from_file_string(file_name:str) -> dt.datetime:
+    def make_date_from_file_string(file_name: str) -> dt.datetime:
         """
         make a date from the file name
         """
-        return dt.datetime.strptime(file_name,"%Y-%m-%d-%H-%M.jpg")
-    
-    def check_for_non_round_image_times(self,image_time_to_pull:dt.date,request_limit:int=0) -> requests.models.Response:
+        return dt.datetime.strptime(file_name, "%Y-%m-%d-%H-%M.jpg")
+
+    def check_for_non_round_image_times(
+        self, image_time_to_pull: dt.date, request_limit: int = 0
+    ) -> requests.models.Response:
         """
         check for non round image times
         if we don't find an image it will look for the previous 4 minute intervals before it
-        for example: 
-        if we are looking for 
-        2021-09-10 10:15:00 
-        
+        for example:
+        if we are looking for
+        2021-09-10 10:15:00
+
         and we don't find it
-        it will look for 
+        it will look for
 
         2021-09-10 10:14:00
         then 2021-09-10 10:13:00
@@ -80,23 +88,26 @@ class SnowbasinImage:
         resp = requests.get(url)
         if resp.ok:
             logger.info(f"[green]Image found at: {url}")
-            return resp,image_time_to_pull
+            return resp, image_time_to_pull
         else:
             logger.info(f"[yellow]Image not found at [/]{url}")
             if request_limit == 5:
-                logger.warn(f"[red]No image found in 5 tries")
+                logger.warn("[red]No image found in 5 tries")
                 return resp
             request_limit += 1
-            image_time_to_pull = image_time_to_pull - dt.timedelta(minutes=request_limit)
-            return self.check_for_non_round_image_times(image_time_to_pull,request_limit)
+            image_time_to_pull = image_time_to_pull - dt.timedelta(
+                minutes=request_limit
+            )
+            return self.check_for_non_round_image_times(
+                image_time_to_pull, request_limit
+            )
 
-
-    def get_image(self, image_time_to_pull:dt.date) -> bool:
+    def get_image(self, image_time_to_pull: dt.date) -> bool:
         """
         scrape Snowbasin image and save to my computer
         return True if successful, False if not
         """
-        resp,image_time = self.check_for_non_round_image_times(image_time_to_pull)
+        resp, image_time = self.check_for_non_round_image_times(image_time_to_pull)
         # if we get a good response, we will save the image
         if resp.ok:
             img_data = resp.content
@@ -109,7 +120,7 @@ class SnowbasinImage:
             return False
 
     @staticmethod
-    def find_next_image_time(current_background:dt.datetime) -> dt.datetime:
+    def find_next_image_time(current_background: dt.datetime) -> dt.datetime:
         """
         return the next good image time as datetime to look for
         """
@@ -118,7 +129,7 @@ class SnowbasinImage:
             # if at least 6 minutes haven't passed, return the current background
             # this will skip looking for new images
             return current_background
-        
+
         if right_now.hour >= 8 and right_now.hour <= 18:
             # between 8am and 6pm we will look for images every 5 minutes
             right_now = right_now.replace(minute=right_now.minute // 5 * 5)
@@ -136,13 +147,19 @@ class SnowbasinImage:
             elif right_now.minute < 60:
                 right_now = right_now.replace(minute=50)
         return right_now
-    
+
     @staticmethod
-    def parse_date_values(date:dt.datetime) -> tuple[str]:
+    def parse_date_values(date: dt.datetime) -> tuple[str]:
         """
         parse the date values into string values return as tuple
         """
-        return date.strftime('%Y'),date.strftime('%m'),date.strftime('%d'),date.strftime('%H'),date.strftime('%M')
+        return (
+            date.strftime("%Y"),
+            date.strftime("%m"),
+            date.strftime("%d"),
+            date.strftime("%H"),
+            date.strftime("%M"),
+        )
 
     def get_files_in_directory(self) -> str:
         """
@@ -154,7 +171,7 @@ class SnowbasinImage:
             files = glob.glob(
                 os.path.join(os.path.expanduser(self.background_file_path), "*.jpg")
             )
-            if len(files)>1:
+            if len(files) > 1:
                 raise OSError("More than one file in the directory")
             return files[0]
             # Print the list of files
@@ -193,13 +210,17 @@ class SnowbasinImage:
         # pull in the current contents of the directory
         current_background_file = self.get_files_in_directory()
         logger.info(f"[blue]Current background image: {current_background_file}")
-        # convert to a datetime object 
-        current_background_image_date = self.make_date_from_file_string(current_background_file.split("/")[-1])
+        # convert to a datetime object
+        current_background_image_date = self.make_date_from_file_string(
+            current_background_file.split("/")[-1]
+        )
         # check the date time
         next_image_to_pull = self.find_next_image_time(current_background_image_date)
         # check if the image already exists, we will log and exit the function
         if next_image_to_pull == current_background_image_date:
-            logger.info(f"[yellow]Not enough time has passed (5 min). Image already exists: {current_background_file}")
+            logger.info(
+                f"[yellow]Not enough time has passed (5 min). Image already exists: {current_background_file}"
+            )
             return True
         # get the image
         if self.get_image(next_image_to_pull):
@@ -207,11 +228,15 @@ class SnowbasinImage:
             if self.store_previous_images:
                 # move the file
                 self.move_last_image(current_background_file)
-                logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
+                logger.info(
+                    f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder."
+                )
             else:
                 # delete the file
                 self.delete_file(current_background_file)
-                logger.info(f"[yellow]Deleted {os.path.basename(current_background_file)}")
+                logger.info(
+                    f"[yellow]Deleted {os.path.basename(current_background_file)}"
+                )
         else:
             return False
 
