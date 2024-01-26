@@ -83,20 +83,25 @@ class SnowbasinImage:
         if we don't find any of those, it will just return the resp object which will be a 404
         log the result, and don't save a picture
         """
+        # set the URL from the image time
         url = self.make_url_string(image_time_to_pull)
         logger.info(f"[blue]Checking for image at: {url}")
+        # make the request for the image
         resp = requests.get(url)
+        # if we get a good response, we will return it
         if resp.ok:
             logger.info(f"[green]Image found at: {url}")
             return resp, image_time_to_pull
+        # if we get a 404, we will try again with the previous minute
         else:
             logger.info(f"[yellow]Image not found at [/]{url}")
-            if request_limit == 5:
+            # if we have tried 5 times, we will return the response
+            if request_limit == 4:
                 logger.warn("[red]No image found in 5 tries")
-                return resp
+                return resp, None
             request_limit += 1
             image_time_to_pull = image_time_to_pull - dt.timedelta(
-                minutes=request_limit
+                minutes=1
             )
             return self.check_for_non_round_image_times(
                 image_time_to_pull, request_limit
@@ -109,12 +114,13 @@ class SnowbasinImage:
         """
         resp, image_time = self.check_for_non_round_image_times(image_time_to_pull)
         # if we get a good response, we will save the image
-        if resp.ok:
+        if resp and image_time:
             img_data = resp.content
             file_path = self.make_file_path_string(image_time)
             with open(os.path.expanduser(file_path), "wb") as handler:
                 handler.write(img_data)
             logger.info(f"[green]Image downloaded and saved to: {file_path}")
+            self.last_image_saved = file_path
             return True
         else:
             return False
@@ -128,6 +134,7 @@ class SnowbasinImage:
         if right_now - current_background < dt.timedelta(minutes=5):
             # if at least 6 minutes haven't passed, return the current background
             # this will skip looking for new images
+            logger.info(f"[yellow]Not enough time has passed (5 min). Time difference: {right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}")
             return current_background
 
         if right_now.hour >= 8 and right_now.hour <= 18:
@@ -219,7 +226,7 @@ class SnowbasinImage:
         # check if the image already exists, we will log and exit the function
         if next_image_to_pull == current_background_image_date:
             logger.info(
-                f"[yellow]Not enough time has passed (5 min). Image already exists: {current_background_file}"
+                f"[yellow]Image already exists: {current_background_file}"
             )
             return True
         # get the image
