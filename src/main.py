@@ -6,11 +6,17 @@ from snowbasin_image import SnowbasinImage, logger
 
 
 def once():
+    """
+    Run the script once and exit
+    """
     s = SnowbasinImage("~/Desktop/backgrounds/")
     s.process()
 
 
 def constant(minute_interval: int = 5):
+    """
+    Run the script constantly and check for new images every minute_interval minutes
+    """
     try:
         s = SnowbasinImage("~/Desktop/backgrounds/")
         while True:
@@ -22,6 +28,10 @@ def constant(minute_interval: int = 5):
 
 
 def main():
+    """
+    Main function to parse arguments and run the script
+    command line accessible through `check-sb`
+    """
     parser = argparse.ArgumentParser(description="Flags to help run this once or constantly")
     parser.add_argument(
         "-c",

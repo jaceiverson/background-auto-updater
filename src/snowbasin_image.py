@@ -31,10 +31,11 @@ class SnowbasinImage:
          - This is an absolute path.
         Example ~/Desktop/backgrounds/
         """
-        self.background_file_path = background_directory
-        self.store_previous_images = store_previous_images
-        self.base_url = "https://storage.googleapis.com/prism-cam-00054"
-        self.image_size = image_size
+        self.background_file_path: str = background_directory
+        self.store_previous_images: bool = store_previous_images
+        self.base_url: str = "https://storage.googleapis.com/prism-cam-00054"
+        self.image_size: str = image_size
+        self.current_image_date: dt.date | None = None
 
     def set_image_size(self, image_size: str) -> None:
         """
@@ -86,7 +87,7 @@ class SnowbasinImage:
 
     def check_for_non_round_image_times(
         self, image_time_to_pull: dt.date, request_limit: int = 0
-    ) -> requests.models.Response:
+    ) -> tuple[requests.Response | None, dt.date | None]:
         """
         check for non round image times
         if we don't find an image it will look for the previous 4 minute intervals before it
@@ -105,6 +106,11 @@ class SnowbasinImage:
         if we don't find any of those, it will just return the resp object which will be a 404
         log the result, and don't save a picture
         """
+        if image_time_to_pull.replace(second=0, microsecond=0) == self.current_image_date.replace(
+            second=0, microsecond=0
+        ):
+            logger.info(f"[yellow]Stopping image search, image already exists: {self.current_image_date}")
+            return None, None
         # set the URL from the image time
         url = self.make_url_string(image_time_to_pull)
         logger.info(f"[blue]Checking for image at: {url}")
@@ -149,20 +155,29 @@ class SnowbasinImage:
         return the next good image time as datetime to look for
         """
         right_now = dt.datetime.now()
-        if right_now - current_background < dt.timedelta(minutes=5):
-            # if at least 6 minutes haven't passed, return the current background
-            # this will skip looking for new images
-            logger.info(
-                "[yellow]Not enough time has passed (5 min). Time difference: "
-                f"{right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
-            )
-            return current_background
 
+        # between 8am and 6pm we will look for images every 5 minutes
         if right_now.hour >= 8 and right_now.hour <= 18:
-            # between 8am and 6pm we will look for images every 5 minutes
+            # if at least 5 minutes haven't passed, return the current background
+            # this will skip looking for new images
+            if right_now - current_background < dt.timedelta(minutes=5):
+                logger.info(
+                    "[yellow]Not enough time has passed (5 min). Time difference: "
+                    f"{right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
+                )
+                return current_background
             right_now = right_now.replace(minute=right_now.minute // 5 * 5)
+
+        # outside of 8am and 6pm we will look for images every 15 minutes
         else:
-            # outside of 8am and 6pm we will look for images every 15 minutes
+            # if at least 15 minutes haven't passed, return the current background
+            # this will skip looking for new images
+            if right_now - current_background < dt.timedelta(minutes=15):
+                logger.info(
+                    "[yellow]Not enough time has passed (15 min). Time difference: "
+                    f"{right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
+                )
+                return current_background
             if right_now.minute < 5:
                 right_now = right_now.replace(minute=50)
                 right_now = right_now - dt.timedelta(hours=1)
@@ -174,7 +189,8 @@ class SnowbasinImage:
                 right_now = right_now.replace(minute=35)
             elif right_now.minute < 60:
                 right_now = right_now.replace(minute=50)
-        return right_now
+        # return the datetime object without seconds or microseconds
+        return right_now.replace(second=0, microsecond=0)
 
     @staticmethod
     def parse_date_values(date: dt.datetime) -> tuple[str]:
@@ -197,6 +213,7 @@ class SnowbasinImage:
         try:
             # Use glob to get a list of files in the directory matching the pattern
             files = glob.glob(os.path.join(os.path.expanduser(self.background_file_path), "*.jpg"))
+            self.current_image_date = self.make_date_from_file_string(files[0].split("/")[-1])
             if len(files) > 1:
                 raise OSError("More than one file in the directory")
             return files[0]
@@ -204,7 +221,7 @@ class SnowbasinImage:
         except OSError as e:
             logger.error(f"Error: {e}")
 
-    def move_last_image(self, old_file_path: str):
+    def move_last_image(self, old_file_path: str) -> None:
         """
         move the older image file to the archive folder
         """
@@ -219,13 +236,13 @@ class SnowbasinImage:
         os.rename(old_file_path, new_file_path)
 
     @staticmethod
-    def delete_file(old_file_path: str):
+    def delete_file(old_file_path: str) -> None:
         """
         delete file at the given path
         """
         os.remove(old_file_path)
 
-    def process(self):
+    def process(self) -> bool:
         """
         main process for looking for the right time
         pulling image
@@ -238,8 +255,12 @@ class SnowbasinImage:
         current_background_image_date = self.make_date_from_file_string(current_background_file.split("/")[-1])
         # check the date time
         next_image_to_pull = self.find_next_image_time(current_background_image_date)
+        logger.info(f"Current image time: {current_background_image_date}")
+        logger.info(f"Next image time: {next_image_to_pull}")
         # check if the image already exists, we will log and exit the function
-        if next_image_to_pull == current_background_image_date:
+        if next_image_to_pull.replace(second=0, microsecond=0) == current_background_image_date.replace(
+            second=0, microsecond=0
+        ):
             logger.info(f"[yellow]Image already exists: {current_background_file}")
             return True
         # get the image
