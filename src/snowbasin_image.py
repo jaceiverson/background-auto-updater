@@ -172,7 +172,7 @@ class SnowbasinImage:
         else:
             # if at least 15 minutes haven't passed, return the current background
             # this will skip looking for new images
-            if right_now - current_background < dt.timedelta(minutes=15):
+            if right_now - current_background < dt.timedelta(minutes=10):
                 logger.info(
                     "[yellow]Not enough time has passed (15 min). Time difference: "
                     f"{right_now.replace(microsecond=0) - current_background.replace(microsecond=0)}"
