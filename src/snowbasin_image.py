@@ -9,13 +9,17 @@ from rich.traceback import install
 
 install(show_locals=True)
 
-
 logging.basicConfig(
     level="NOTSET",
     format="%(message)s",
     handlers=[RichHandler(markup=True)],
 )
 logger = logging.getLogger("rich")
+
+"""
+We like to use rich for logging and for traceback
+it provides a nicer output
+"""
 
 
 class SnowbasinImage:
@@ -37,7 +41,7 @@ class SnowbasinImage:
         self.image_size: str = image_size
         self.current_image_date: dt.date | None = None
         self.validate_background_directory()
-        self.check_directory_structure()  
+        self.check_directory_structure()
 
     def set_image_size(self, image_size: str) -> None:
         """
@@ -47,7 +51,7 @@ class SnowbasinImage:
 
     def validate_background_directory(self) -> None:
         """
-        validate the background directory
+        validate the background directory added a / to the end if it doesn't exist
         """
         if self.background_file_path[-1] != "/":
             logger.info(f"[yellow]Adding / to the end of the background directory: {self.background_file_path}")
@@ -55,62 +59,72 @@ class SnowbasinImage:
 
     def check_directory_structure(self) -> None:
         """
-        checks the directory structure and creates a few files if needed
+        checks the directory structure or `old_backgrounds` and creates a few files if needed
         """
-        if self.store_previous_images and not os.path.exists(os.path.expanduser(f"{self.background_file_path}old_backgrounds/")):
+        if self.store_previous_images and not os.path.exists(
+            os.path.expanduser(f"{self.background_file_path}old_backgrounds/")
+        ):
             os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"))
 
     def process(self) -> bool:
         """
-        main process for looking for the right time
-        pulling image
-        and moving/deleting the old image
+        main process for finding and saving the most recent image
         """
-        # pull in the current contents of the directory
         # step 1
+        # pull in the current contents of the directory
         current_background_file = self.get_files_in_directory()
         logger.info(f"[blue]Current background image: {current_background_file}")
-        # if we have a file, we will do the main process
+        # if we have a file, we will convert it (a string) to a datetime object
         if current_background_file:
             # convert to a datetime object
             current_background_image_date = self.make_date_from_file_string(current_background_file.split("/")[-1])
+            # step 2-a
             # check the date time
-            # step 2
             next_image_to_pull = self.find_next_image_time(current_background_image_date)
-            
+
         # if we don't find a file, we need to start the process from scratch
         else:
             logger.info("[yellow]No image found in the directory")
             current_background_image_date = ""
+            # step 2-b
+            # i chose to go back 1 day to find the next image (this is overkill)
+            # as long as we went back further than 5 minutes it would get us an image to pull
             next_image_to_pull = self.find_next_image_time(dt.datetime.now() - dt.timedelta(days=1))
 
+        # log the current and next image time
         logger.info(f"Current image time: {current_background_image_date}")
         logger.info(f"Next image time: {next_image_to_pull}")
+
         # check if the image already exists, we will log and exit the function
-        if current_background_image_date and next_image_to_pull.replace(second=0, microsecond=0) == current_background_image_date.replace(
+        # add a check first to make sure current_background_image_date is not None
+        if current_background_image_date and next_image_to_pull.replace(
             second=0, microsecond=0
-        ):
+        ) == current_background_image_date.replace(second=0, microsecond=0):
             logger.info(f"[yellow]Image already exists: {current_background_file}")
             return True
-        # get the image
+
         # step 3
+        # get the image and save it
+        # if we don't find an image, we will return False and exit the function
         if self.get_image(next_image_to_pull):
             # depending on the value of store_previous_images, we will either move or delete the file
             if self.store_previous_images:
+                # if the file doesn't exist, we don't need to move anything
+                # this should only happen on the first run
                 if current_background_file:
-                    # move the file
                     # step 4-a
+                    # move the file
                     self.move_last_image(current_background_file)
                     logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
+                # log if there wasn't a file to move
                 logger.info(f"[yellow]No previous image to move.")
             else:
-                # delete the file
                 # step 4-b
+                # delete the file
                 self.delete_file(current_background_file)
                 logger.info(f"[yellow]Deleted {os.path.basename(current_background_file)}")
         else:
             return False
-
 
     def get_files_in_directory(self) -> str:
         """
@@ -123,13 +137,11 @@ class SnowbasinImage:
         if len(files) > 1:
             logger.error(f"[red]More than one file in the directory: {files}")
             raise OSError("More than one file in the directory")
-        if files: 
+        if files:
             self.current_image_date = self.make_date_from_file_string(files[0].split("/")[-1])
             return files[0]
         else:
             return ""
-
-
 
     @staticmethod
     def make_date_from_file_string(file_name: str) -> dt.datetime:
@@ -230,8 +242,11 @@ class SnowbasinImage:
         if we don't find any of those, it will just return the resp object which will be a 404
         log the result, and don't save a picture
         """
-        if image_time_to_pull and self.current_image_date and image_time_to_pull.replace(second=0, microsecond=0) == self.current_image_date.replace(
-            second=0, microsecond=0
+        if (
+            image_time_to_pull
+            and self.current_image_date
+            and image_time_to_pull.replace(second=0, microsecond=0)
+            == self.current_image_date.replace(second=0, microsecond=0)
         ):
             logger.info(f"[yellow]Stopping image search, image already exists: {self.current_image_date}")
             return None, None

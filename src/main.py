@@ -31,8 +31,9 @@ def main():
     """
     Main function to parse arguments and run the script
     command line accessible through `check-sb`
+    None of the flags are required and all have defaults
     """
-    parser = argparse.ArgumentParser(description="Flags to help run this once or constantly")
+    parser = argparse.ArgumentParser(description="Snowbasin Image downloader CLI tool.")
     parser.add_argument(
         "-c",
         "--constant",
