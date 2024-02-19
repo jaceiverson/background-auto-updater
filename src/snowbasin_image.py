@@ -61,10 +61,8 @@ class SnowbasinImage:
         """
         checks the directory structure or `old_backgrounds` and creates a few files if needed
         """
-        if self.store_previous_images and not os.path.exists(
-            os.path.expanduser(f"{self.background_file_path}old_backgrounds/")
-        ):
-            os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"))
+        if self.store_previous_images:
+            os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"), exist_ok=True)
 
     def process(self) -> bool:
         """
@@ -205,9 +203,8 @@ class SnowbasinImage:
         if resp and image_time:
             img_data = resp.content
             file_path = self.make_file_path_string(image_time)
-            # check if the path exists
-            if not os.path.exists(os.path.expanduser(self.background_file_path)):
-                os.makedirs(os.path.expanduser(self.background_file_path))
+            # make the directory if it doesn't exist
+            os.makedirs(os.path.expanduser(self.background_file_path), exist_ok=True)
             # save the image data to the .jpg file
             with open(os.path.expanduser(file_path), "wb") as handler:
                 handler.write(img_data)
@@ -280,10 +277,10 @@ class SnowbasinImage:
         # check if the directory exists
         if not os.path.exists(new_backgrounds_path):
             logger.info(f"[blue]File not found: {new_backgrounds_path}. Creating directories and file.")
-            os.makedirs(new_backgrounds_path)
+            os.makedirs(new_backgrounds_path, exist_ok=True)
         if not os.path.exists(old_file_path):
             logger.info(f"[blue]File not found: {old_file_path}. Creating directories and file.")
-            os.makedirs(old_file_path)
+            os.makedirs(old_file_path, exist_ok=True)
         # set the new file path
         new_file_path = os.path.join(new_backgrounds_path, old_file_name)
         # move the file
