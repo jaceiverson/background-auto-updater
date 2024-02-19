@@ -4,7 +4,7 @@
 
 Pulled from Mt. Ogden webcam: https://www.snowbasin.com/the-mountain/web-cams/
 
-This image is taken every 5 minutes during the day (8am to 6pm) and around every 15 minutes during the evening (6pm to 8am). These images are saved at a googleapi endpoint: https://storage.googleapis.com/prism-cam-00054/ and can be retrieved with altering the date code in the URL. We found this from the inspect tool in chrome: 
+This image is taken every 5 minutes during the day (8am to 6pm) and around every 15 minutes during the evening (6pm to 8am). These images are saved at a googleapi endpoint: https://storage.googleapis.com/prism-cam-00054/ and can be retrieved with altering the date code in the URL. We found this from the inspect tool in chrome:
 
 <img width="1680" alt="Mt Ogden webcam - inspect view" src="https://github.com/jaceiverson/snowbasin-background-auto-updater/assets/47643209/b7b9a72a-5e91-4697-b2d6-f1b2147e0806">
 
@@ -27,6 +27,12 @@ check-sb
 If you run it using the script and not as a cronjob/scheduled job, it is recommended to use a screen to run it in the background.
 
 ### Flags
+
+The main flag that should be used is `-f`. This tells the program which directory to save and look for files in. The default file path is:
+
+```
+~/Desktop/backgrounds/
+```
 
 There is a flag `-c` or `--constant` that you can use to check forever (until you kill the program). There is also another flag `-m` or `--minute` that will tell the program how frequently--in minutes--to check for a new image (default is 5).
 

@@ -1,7 +1,7 @@
 [project]
 name = "snowbasin-background-image"
 description = "Update your background to the most recent image of Mt Ogden"
-version = "0.0.1"
+version = "1.0.0"
 
 [project.scripts]
 check-sb="main:main"

@@ -50,7 +50,7 @@ def main():
         "-f",
         "--folder-path",
         type=str,
-        default="~/Desktop/backgrounds",
+        default="~/Desktop/backgrounds/",
         help="folder path to save images to",
     )
     args = parser.parse_args()
