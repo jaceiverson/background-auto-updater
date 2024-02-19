@@ -55,7 +55,7 @@ class SnowbasinImage:
         """
         if self.background_file_path[-1] != "/":
             logger.info(f"[yellow]Adding / to the end of the background directory: {self.background_file_path}")
-            self.background_file_path = self.background_file_path + "/"
+            self.background_file_path = os.path.join(self.background_file_path,"")
 
     def check_directory_structure(self) -> None:
         """
