@@ -115,7 +115,7 @@ class SnowbasinImage:
         url = self.make_url_string(image_time_to_pull)
         logger.info(f"[blue]Checking for image at: {url}")
         # make the request for the image
-        resp = requests.get(url,timeout=5)
+        resp = requests.get(url, timeout=5)
         # if we get a good response, we will return it
         if resp.ok:
             logger.info(f"[green]Image found at: {url}")

@@ -5,7 +5,7 @@ import time
 from snowbasin_image import SnowbasinImage, logger
 
 
-def once(folder_path:str):
+def once(folder_path: str):
     """
     Run the script once and exit
     """
@@ -13,7 +13,7 @@ def once(folder_path:str):
     s.process()
 
 
-def constant(folder_path:str, minute_interval: int = 5):
+def constant(folder_path: str, minute_interval: int = 5):
     """
     Run the script constantly and check for new images every minute_interval minutes
     """
@@ -56,7 +56,7 @@ def main():
     args = parser.parse_args()
     logger.info(f"Running with args: {args}")
     if args.constant:
-        constant(args.folder_path,args.minute_interval)
+        constant(args.folder_path, args.minute_interval)
     else:
         once(args.folder_path)
 
