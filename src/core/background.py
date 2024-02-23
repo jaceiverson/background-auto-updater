@@ -7,7 +7,7 @@ import requests
 from rich.logging import RichHandler
 from rich.traceback import install
 
-install(show_locals=True)
+install(show_locals=False)
 
 logging.basicConfig(
     level="NOTSET",
@@ -20,9 +20,14 @@ logger = logging.getLogger("rich")
 We like to use rich for logging and for traceback
 it provides a nicer output
 """
+class PostInitCaller(type):
+    # https://stackoverflow.com/questions/795190/how-to-perform-common-post-initialization-tasks-in-inherited-classes
+    def __call__(cls, *args, **kwargs):
+        obj = type.__call__(cls, *args, **kwargs)
+        obj.__post_init__()
+        return obj
 
-
-class BackgroundImageFetcher:
+class BackgroundImageFetcher(metaclass=PostInitCaller):
     def __init__(
         self,
         background_directory: str = None,
@@ -37,15 +42,23 @@ class BackgroundImageFetcher:
         """
         self.background_file_path: str = background_directory or os.path.expanduser("~/Desktop/backgrounds/")
         self.store_previous_images: bool = store_previous_images
-        self.base_url: str = base_url
         self.current_image_date: dt.date | None = None
+
+    def __post_init__(self) -> None:
+        """
+        post init function
+        """
         self.validate_background_directory()
         self.check_directory_structure()
+        logger.info(f"[yellow]Background directory: {self.background_file_path}")
+        logger.info(f"[yellow]Store previous images: {self.store_previous_images}")
+
 
     def validate_background_directory(self) -> None:
         """
         validate the background directory added a / to the end if it doesn't exist
         """
+        logger.info(f"[yellow]Validating the background directory...")
         if self.background_file_path[-1] != "/":
             logger.info(f"[yellow]Adding / to the end of the background directory: {self.background_file_path}")
             self.background_file_path = os.path.join(self.background_file_path, "")
@@ -54,6 +67,7 @@ class BackgroundImageFetcher:
         """
         checks the directory structure or `old_backgrounds` and creates a few files if needed
         """
+        logger.info(f"[yellow]Checking the directory structure. Will add `old_backgrounds` if needed...")
         if self.store_previous_images:
             os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"), exist_ok=True)
 
@@ -173,7 +187,7 @@ class BackgroundImageFetcher:
         helper function
         write the image to a file
         """
-        with open(file_path, "wb") as handler:
+        with open(os.path.expanduser(file_path), "wb") as handler:
             handler.write(image_response_object.content)
 
     @staticmethod
