@@ -24,8 +24,8 @@ it provides a nicer output
 
 class PostInitCaller(type):
     # https://stackoverflow.com/questions/795190/how-to-perform-common-post-initialization-tasks-in-inherited-classes
-    def __call__(self, *args, **kwargs):
-        obj = type.__call__(self, *args, **kwargs)
+    def __call__(cls, *args, **kwargs):
+        obj = type.__call__(cls, *args, **kwargs)
         obj.__post_init__()
         return obj
 
