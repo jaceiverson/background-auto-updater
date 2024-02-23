@@ -1,10 +1,11 @@
 [project]
-name = "snowbasin-background-image"
-description = "Update your background to the most recent image of Mt Ogden"
-version = "1.0.0"
+name = "background-image-updater"
+description = "Update your background to the most recent image of your favorite site"
+version = "1.5.0"
 
 [project.scripts]
-check-sb="main:main"
+snowbasin="snowbasin.main:main"
+nasa="nasa.nasa_image_of_the_day:main"
 
 [tool.ruff]
 line-length = 120
