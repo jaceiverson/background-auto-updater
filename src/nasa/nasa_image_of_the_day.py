@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from core.background import BackgroundImageFetcher
+from core.logger import logger
 
 
 def get_main_page():

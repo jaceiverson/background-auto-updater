@@ -1,26 +1,12 @@
 import datetime as dt
-import glob
-import logging
 import os
 
 import requests
 from core.background import BackgroundImageFetcher
-from rich.logging import RichHandler
+from core.logger import logger
 from rich.traceback import install
 
 install(show_locals=True)
-
-logging.basicConfig(
-    level="NOTSET",
-    format="%(message)s",
-    handlers=[RichHandler(markup=True)],
-)
-logger = logging.getLogger("rich")
-
-"""
-We like to use rich for logging and for traceback
-it provides a nicer output
-"""
 
 
 class SnowbasinImage(BackgroundImageFetcher):

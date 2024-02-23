@@ -1,30 +1,19 @@
 import datetime as dt
 import glob
-import logging
 import os
 
 import requests
-from rich.logging import RichHandler
 from rich.traceback import install
+from core.logger import logger
 
 install(show_locals=False)
 
-logging.basicConfig(
-    level="NOTSET",
-    format="%(message)s",
-    handlers=[RichHandler(markup=True)],
-)
-logger = logging.getLogger("rich")
-
-"""
-We like to use rich for logging and for traceback
-it provides a nicer output
-"""
 
 
 class PostInitCaller(type):
     # https://stackoverflow.com/questions/795190/how-to-perform-common-post-initialization-tasks-in-inherited-classes
     def __call__(cls, *args, **kwargs):
+        # sourcery skip: instance-method-first-arg-name
         obj = type.__call__(cls, *args, **kwargs)
         obj.__post_init__()
         return obj
@@ -39,6 +28,7 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         """
         initialize the class
         background_directory: the directory where the images will be saved.
+        store_previous_images: if True, the previous image will be moved to a folder called `old_backgrounds`
          - This is an absolute path.
         Example for Mac: ~/Desktop/backgrounds/
         """
@@ -48,7 +38,7 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
 
     def __post_init__(self) -> None:
         """
-        post init function
+        post init function to run after the class is initialized
         """
         self.validate_background_directory()
         self.check_directory_structure()
