@@ -27,7 +27,7 @@ class BackgroundImageFetcher:
         self,
         background_directory: str = None,
         store_previous_images: bool = True,
-        base_url:str = None,
+        base_url: str = None,
     ) -> None:
         """
         initialize the class
@@ -48,7 +48,7 @@ class BackgroundImageFetcher:
         """
         if self.background_file_path[-1] != "/":
             logger.info(f"[yellow]Adding / to the end of the background directory: {self.background_file_path}")
-            self.background_file_path = os.path.join(self.background_file_path,"")
+            self.background_file_path = os.path.join(self.background_file_path, "")
 
     def check_directory_structure(self) -> None:
         """
@@ -57,7 +57,7 @@ class BackgroundImageFetcher:
         if self.store_previous_images:
             os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"), exist_ok=True)
 
-    def process(self,url_to_get:str) -> None:
+    def process(self, url_to_get: str) -> None:
         """
         main process function
         """
@@ -65,7 +65,7 @@ class BackgroundImageFetcher:
         current_file = self.get_current_files_in_directory()
         if not current_file:
             logger.info("[yellow]No image found in the directory")
-        elif current_file ==self.make_file_path_string(dt.date.today()):
+        elif current_file == self.make_file_path_string(dt.date.today()):
             logger.info(f"[yellow]Image already exists: {current_file}")
             return False
         # Step 2
@@ -109,7 +109,7 @@ class BackgroundImageFetcher:
         helper: make a date from the file name
         """
         return dt.datetime.strptime(file_name, "%Y-%m-%d-%H-%M.jpg")
-            
+
     def move_last_image(self, old_file_path: str) -> None:
         """
         Step 4-a
@@ -166,7 +166,7 @@ class BackgroundImageFetcher:
         pull an image from the web
         """
         return requests.get(image_url, timeout=5)
-    
+
     @staticmethod
     def write_image_to_file(image_response_object: requests.Response, file_path: str) -> None:
         """
