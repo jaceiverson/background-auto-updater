@@ -20,12 +20,15 @@ logger = logging.getLogger("rich")
 We like to use rich for logging and for traceback
 it provides a nicer output
 """
+
+
 class PostInitCaller(type):
     # https://stackoverflow.com/questions/795190/how-to-perform-common-post-initialization-tasks-in-inherited-classes
-    def __call__(cls, *args, **kwargs):
-        obj = type.__call__(cls, *args, **kwargs)
+    def __call__(self, *args, **kwargs):
+        obj = type.__call__(self, *args, **kwargs)
         obj.__post_init__()
         return obj
+
 
 class BackgroundImageFetcher(metaclass=PostInitCaller):
     def __init__(
@@ -52,12 +55,11 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         logger.info(f"[yellow]Background directory: {self.background_file_path}")
         logger.info(f"[yellow]Store previous images: {self.store_previous_images}")
 
-
     def validate_background_directory(self) -> None:
         """
         validate the background directory added a / to the end if it doesn't exist
         """
-        logger.info(f"[yellow]Validating the background directory...")
+        logger.info("[yellow]Validating the background directory...")
         if self.background_file_path[-1] != "/":
             logger.info(f"[yellow]Adding / to the end of the background directory: {self.background_file_path}")
             self.background_file_path = os.path.join(self.background_file_path, "")
@@ -66,7 +68,7 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         """
         checks the directory structure or `old_backgrounds` and creates a few files if needed
         """
-        logger.info(f"[yellow]Checking the directory structure. Will add `old_backgrounds` if needed...")
+        logger.info("[yellow]Checking the directory structure. Will add `old_backgrounds` if needed...")
         if self.store_previous_images:
             os.makedirs(os.path.expanduser(f"{self.background_file_path}old_backgrounds/"), exist_ok=True)
 
@@ -87,13 +89,11 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         # Step 3
         self.write_image_to_file(new_image, self.make_file_path_string(dt.date.today()))
         logger.info(f"[blue]Wrote image to file: {self.make_file_path_string(dt.date.today())}")
-        # Step 4
-        if self.store_previous_images:
-            if current_file:
+        if current_file:
+            if self.store_previous_images:
                 self.move_last_image(current_file)
                 logger.info(f"[blue]Moved last image to old_backgrounds: {current_file}")
-        else:
-            if current_file:
+            else:
                 self.delete_file(current_file)
                 logger.info(f"[blue]Deleted last image: {current_file}")
 

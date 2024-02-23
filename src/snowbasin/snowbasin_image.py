@@ -4,10 +4,9 @@ import logging
 import os
 
 import requests
+from core.background import BackgroundImageFetcher
 from rich.logging import RichHandler
 from rich.traceback import install
-
-from core.background import BackgroundImageFetcher
 
 install(show_locals=True)
 
