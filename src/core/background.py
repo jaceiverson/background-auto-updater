@@ -32,7 +32,6 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         self,
         background_directory: str = None,
         store_previous_images: bool = True,
-        base_url: str = None,
     ) -> None:
         """
         initialize the class
