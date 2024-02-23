@@ -35,3 +35,7 @@ to pull images from the NASA's image of the day page.
 ## Cronjob
 
 Easiest way to schedule something is to use the cronjob for a Mac. If you need help determining the cron syntax, I like to use https://crontab.guru/ to help me.
+
+# Repo Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/07494607c0d34355776353e5480cf3c5702c8068.svg "Repobeats analytics image")
