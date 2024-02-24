@@ -84,8 +84,9 @@ class SnowbasinImage(BackgroundImageFetcher):
                     # move the file
                     self.move_last_image(current_background_file)
                     logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
-                # log if there wasn't a file to move
-                logger.info(f"[yellow]No previous image to move.")
+                else:
+                    # log if there wasn't a file to move
+                    logger.info(f"[yellow]No previous image to move.")
             else:
                 # step 4-b
                 # delete the file
