@@ -3,11 +3,10 @@ import glob
 import os
 
 import requests
-from rich.traceback import install
 from core.logger import logger
+from rich.traceback import install
 
 install(show_locals=False)
-
 
 
 class PostInitCaller(type):
@@ -168,7 +167,7 @@ class BackgroundImageFetcher(metaclass=PostInitCaller):
         helper function
         pull an image from the web
         """
-        return requests.get(image_url, timeout=5)
+        return requests.get(image_url, timeout=10)
 
     @staticmethod
     def write_image_to_file(image_response_object: requests.Response, file_path: str) -> None:
