@@ -2,7 +2,7 @@
 import argparse
 import time
 
-from snowbasin_image import SnowbasinImage, logger
+from snowbasin.snowbasin_image import SnowbasinImage, logger
 
 
 def once(folder_path: str):
