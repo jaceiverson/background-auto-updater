@@ -21,7 +21,7 @@ pip install -e .
 Then you will be able to use the alias in the terminal:
 
 ```
-check-sb
+snowbasin
 ```
 
 If you run it using the script and not as a cronjob/scheduled job, it is recommended to use a screen to run it in the background.

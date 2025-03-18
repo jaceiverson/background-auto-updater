@@ -3,8 +3,9 @@ import glob
 import os
 
 import requests
-from core.logger import logger
 from rich.traceback import install
+
+from src.core.logger import logger
 
 install(show_locals=False)
 

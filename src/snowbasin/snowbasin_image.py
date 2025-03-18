@@ -1,10 +1,12 @@
 import datetime as dt
 import os
+import time
 
 import requests
-from core.background import BackgroundImageFetcher
-from core.logger import logger
 from rich.traceback import install
+
+from src.core.background import BackgroundImageFetcher
+from src.core.logger import logger
 
 install(show_locals=True)
 
@@ -226,3 +228,39 @@ class SnowbasinImage(BackgroundImageFetcher):
             f"{date.strftime('%M')}/"
             f"{self.image_size}.jpg"
         )
+
+    def pull_one_day_to_old_backgrounds(self, date: dt.datetime, poll_frequency: int) -> int:
+        """
+        Given a date, pull all the images from that day (still adhering to the normal cadence
+        """
+        # set the start time to 8am
+        date = date.replace(hour=0, minute=1)
+        # set the end time to 6pm
+        end_date = date.replace(hour=23, minute=59)
+        images_found = 0
+        # loop through the times
+        while date < end_date:
+            # log our current date
+            logger.info(f"[blue]Checking for image at: {date}")
+            # get the image
+            # and increment our date accordingly
+            # if we find an image lets skip forward 5 minutes, if not just 1
+            resp, returned_date = self.check_for_non_round_image_times(date, request_limit=4)
+
+            if resp.ok:
+                file_path = self.make_file_path_string(date)
+                # make the directory if it doesn't exist
+                os.makedirs(os.path.expanduser(self.background_file_path), exist_ok=True)
+                # save the image data to the .jpg file
+                self.write_image_to_file(resp, file_path)
+                logger.info(f"[green]Image downloaded and saved to: {file_path}")
+                image_found = True
+
+            else:
+                image_found = False
+
+            images_found += image_found
+            date += dt.timedelta(minutes=5) if image_found else dt.timedelta(minutes=1)
+            # wait a second before requesting
+            time.sleep(poll_frequency)
+        return images_found
