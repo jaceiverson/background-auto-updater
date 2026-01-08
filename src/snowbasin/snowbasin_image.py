@@ -5,8 +5,8 @@ import time
 import requests
 from rich.traceback import install
 
-from src.core.background import BackgroundImageFetcher
-from src.core.logger import logger
+from core.background import BackgroundImageFetcher
+from core.logger import logger
 
 install(show_locals=True)
 

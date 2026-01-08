@@ -3,7 +3,7 @@ import argparse
 import datetime as dt
 import time
 
-from src.snowbasin.snowbasin_image import SnowbasinImage, logger
+from snowbasin.snowbasin_image import SnowbasinImage, logger
 
 
 def once(folder_path: str) -> None:
