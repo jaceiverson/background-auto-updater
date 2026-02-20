@@ -84,6 +84,7 @@ class SnowbasinImage(BackgroundImageFetcher):
                 if current_background_file:
                     # step 4-a
                     # move the file
+                    time.sleep(7)
                     self.move_last_image(current_background_file)
                     logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
                 else:
