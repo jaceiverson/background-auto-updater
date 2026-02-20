@@ -1,3 +1,5 @@
 requests
 rich
 beautifulsoup4
+opencv-python # for image comparison
+numpy # for image comparison

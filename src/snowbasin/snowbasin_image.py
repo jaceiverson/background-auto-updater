@@ -5,8 +5,8 @@ import time
 import requests
 from rich.traceback import install
 
-from src.core.background import BackgroundImageFetcher
-from src.core.logger import logger
+from core.background import BackgroundImageFetcher
+from core.logger import logger
 
 install(show_locals=True)
 
@@ -84,6 +84,7 @@ class SnowbasinImage(BackgroundImageFetcher):
                 if current_background_file:
                     # step 4-a
                     # move the file
+                    time.sleep(7)
                     self.move_last_image(current_background_file)
                     logger.info(f"[yellow]Moved {os.path.basename(current_background_file)} to archive folder.")
                 else:
