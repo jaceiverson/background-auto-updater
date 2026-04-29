@@ -36,6 +36,9 @@ to pull images from the NASA's image of the day page.
 
 Easiest way to schedule something is to use the cronjob for a Mac. If you need help determining the cron syntax, I like to use https://crontab.guru/ to help me.
 
+# Example Output in GIF form
+Using Mac shortcuts we can automate a full days worth of images and make a gif. It looks something like this: 
+![Snowbasin Background - Late April snow storm](src/snowbasin/outputs/2026-04-26.gif)
 # Repo Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/07494607c0d34355776353e5480cf3c5702c8068.svg "Repobeats analytics image")
